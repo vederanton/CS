@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -206,12 +206,13 @@ namespace Homework29
 
     class Program
     {
-        static void CheckGameWin(House house, ref char whatNext)
+        static bool CheckGameWin(House house)
         {
             if (house.Roof.IsBuilt == true)
             {
-                whatNext = '9';
+                return true;
             }
+            return false;
         }
 
         static void Main(string[] args)
@@ -258,6 +259,7 @@ namespace Homework29
                         while (howMany != '1' && howMany != '2');
 
                         char whatNext;
+                        bool checkWin = false;
                         Console.Clear();
                         do
                         {
@@ -266,12 +268,12 @@ namespace Homework29
                             Console.WriteLine("2 - отчет от прораба");
                             if (team.Worker2.IsHired == false)
                                 Console.WriteLine("\n3 - нанять еще одного строителя");
-                            whatNext = Console.ReadKey().KeyChar;
+                            whatNext = Console.ReadKey().KeyChar;                           
                             switch (whatNext)
                             {
                                 case '1':
                                     team.Worker1.Work(house, team);
-                                    CheckGameWin(house, ref whatNext);
+                                    checkWin = CheckGameWin(house);
                                     break;
                                 case '2':
                                     team.TeamLeader.Work(house, team);
@@ -291,7 +293,7 @@ namespace Homework29
                                     continue;
                             }
                         }
-                        while (whatNext != '9');
+                        while (checkWin != true);
 
                         Console.Clear();
                         Console.WriteLine(@"
