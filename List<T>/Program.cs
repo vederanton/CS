@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,14 +33,20 @@ namespace Homework30
                 throw new ArgumentNullException("Collection is null.");
             _capacity = coll._capacity;
             _arr = new T[_capacity];
-            coll._arr.CopyTo(_arr, 0);
+            for (var i = 0; i < coll._arr.Length; ++i)
+                _arr[i] = coll._arr[i];
             _count = coll._count;
         }
+
+        // Cв-во по логике List<T> только возвращает значение, без возможности SET. Поэтому внутри класса используется _count.
         public int Count
         {
             get { return _count; }
         }
-        public int Capacity
+
+        // Cв-во по логике, как и в List<T>, предоставляется для использования вне класса. 
+        // Использование его SET внутри класса вместо _capacity будет приводить к исключению OutOfMemoryException.
+        public int Capacity 
         {
             get { return _capacity; }
             set
@@ -52,6 +58,7 @@ namespace Homework30
                 _capacity = value;
             }
         }
+
         public T this[int index]
         {
             get
@@ -67,12 +74,22 @@ namespace Homework30
                 _arr[index] = value;
             }
         }
+        public static void Resize(ref T[] arr, int newSize)
+        {
+            if (newSize < 0)
+                throw new ArgumentOutOfRangeException("newSize is less than zero.");
+            T[] newArr = new T[newSize];
+            var minSize = Math.Min(arr.Length, newSize);
+            for (var i = 0; i < minSize; i++)
+                newArr[i] = arr[i];
+            arr = newArr;               
+        }
         public void Add(T item)
         {
             if (_capacity == _count)
             {
                 _capacity *= 2;
-                Array.Resize<T>(ref _arr, _capacity);
+                MyCollection<T>.Resize(ref _arr, _capacity);
             }
             _arr[_count] = item;
             _count++;
@@ -91,7 +108,7 @@ namespace Homework30
             if (_capacity == _count)
             {
                 _capacity *= 2;
-                Array.Resize<T>(ref _arr, _capacity);
+                MyCollection<T>.Resize(ref _arr, _capacity);
             }
             for (var i = _count; i != index; i--)
             {
@@ -111,7 +128,7 @@ namespace Homework30
             while (_capacity < tempCount)
                 _capacity *= 2;
             if (tempCapacity != _capacity)
-                Array.Resize<T>(ref _arr, _capacity);
+                MyCollection<T>.Resize(ref _arr, _capacity);
             var i = tempCount - 1;
             for (var j = _count - 1; j != index; i--, j--)
                 _arr[i] = _arr[j];
@@ -122,7 +139,15 @@ namespace Homework30
         }
         public bool Remove(T item)
         {
-            var removeIndex = Array.IndexOf(_arr, item);
+            var removeIndex = -1;
+            for(var i = 0; i < _arr.Length; i++)
+            {
+                if((object)_arr[i] == (object)item)
+                {
+                    removeIndex = i;
+                    break;
+                }
+            }
             if (removeIndex == -1)
                 return false;
             for (var i = removeIndex; i <= _count - 2; i++)
@@ -133,7 +158,7 @@ namespace Homework30
             if (_count * 2.5 < _capacity)
             {
                 _capacity /= 2;
-                Array.Resize(ref _arr, _capacity);
+                MyCollection<T>.Resize(ref _arr, _capacity);
             }
             return true;
         }
@@ -152,7 +177,7 @@ namespace Homework30
             if (_count * 2.5 < _capacity)
             {
                 _capacity /= 2;
-                Array.Resize(ref _arr, _capacity);
+                MyCollection<T>.Resize(ref _arr, _capacity);
             }
         }
         public int IndexOf(T item, int index, int count)
@@ -185,11 +210,25 @@ namespace Homework30
                 throw new ArgumentOutOfRangeException("Index is less than 0 or count is less than 0.");
             if (_count < index + count)
                 throw new ArgumentException("Index and count do not denote a valid range of elements.");
-            Array.Reverse(_arr, index, count);
+            T tempElem;
+            var i = index;
+            for(var j = i + count - 1; i < j; i++, j--)
+            {
+                tempElem = _arr[j];
+                _arr[j] = _arr[i];
+                _arr[i] = tempElem;
+            }
         }
         public void Reverse()
         {
-            Array.Reverse(_arr);
+            T tempElem;
+            var i = 0;
+            for (var j = _count - 1; i < j; i++, j--)
+            {
+                tempElem = _arr[j];
+                _arr[j] = _arr[i];
+                _arr[i] = tempElem;
+            }
         }
         public IEnumerator GetEnumerator()
         {
@@ -224,14 +263,13 @@ namespace Homework30
                 _index = -1;
             }
         }
-        public void Sort()
-        {
-            Array.Sort<T>(_arr, 0, _count);
-        }
     }
 
     class Program
     {
+        public static void Main()
+        {
 
+        }           
     }
 }
